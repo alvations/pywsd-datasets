@@ -1,6 +1,10 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+
+# Built data lives on HuggingFace Hub (alvations/pywsd-datasets), not git.
+data/
+
 build/
 dist/
 .eggs/

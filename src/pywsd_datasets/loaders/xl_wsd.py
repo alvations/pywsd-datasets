@@ -1,19 +1,44 @@
-"""XL-WSD loader — multilingual (18 languages, BabelNet-keyed).
+"""XL-WSD loader — multilingual (18 languages).
 
-Pasini, Raganato, Navigli 2021 "XL-WSD: An Extra-Large and
-Cross-Lingual Evaluation Framework for Word Sense Disambiguation".
+**Status: not implemented in v0.2.** Called explicitly raises
+``NotImplementedError`` so nothing silently degrades.
 
-License: CC-BY-NC 4.0. Data distributed via Google Drive from
-https://sapienzanlp.github.io/xl-wsd/ — mirror to HF Hub once
-licensing-consistent hosting is set up.
+Why we skipped it
+-----------------
 
-XL-WSD shares the Raganato XML format; gold keys are BabelNet IDs
-(e.g. ``bn:00009191n``). Use :mod:`pywsd_datasets.mappers.babelnet_to_wn`
-to resolve BN → PWN 3.0 → modern lexicon. Without ``bn_to_wn.txt`` the
-``sense_ids_wordnet`` field stays empty; rows are still emitted so
-coverage_report can flag the gap.
+XL-WSD (Pasini, Raganato, Navigli 2021) uses BabelNet synset IDs as
+gold labels (e.g. ``bn:00009191n``). Resolving those to modern ``wn``
+lexicon synset IDs requires a BabelNet → PWN 3.0 bridge file that is
+distributed only to BabelNet academic licensees. Without that file,
+rows would ship with empty ``sense_ids_wordnet`` and the coverage
+report would drop to ~0 % — worse than the current state.
 
-**V1 stub.** Wire once BabelNet mapping file is available.
+Additionally, the CC-BY-NC 4.0 license on XL-WSD means we cannot
+redistribute the gold files in a repo that advertises MIT (loader-only
+is acceptable, but still needs the BabelNet mapping to be useful).
+
+Resurrecting it
+---------------
+
+1. Acquire a BabelNet 4.x academic license + the ``bn_to_wn.txt``
+   mapping file.
+2. Load the mapping at build time with
+   :func:`pywsd_datasets.mappers.babelnet_to_wn.load_bn_to_pwn3_map`.
+3. Use the OMW lexicon matching each target language via
+   :func:`pywsd_datasets.mappers.omw_lookup.lexicon_for`.
+4. Call the PWN 3.0 → lexicon mapper
+   (:func:`pywsd_datasets.mappers.pwn3_to_oewn.pwn3_sensekey_to_wn`)
+   with ``lexicon=lexicon_for(lang)``.
+
+See ``loaders/raganato.py`` for the XML walking pattern; XL-WSD shares
+the Raganato format.
+
+References
+----------
+* Pasini, Raganato, Navigli (2021). *XL-WSD: An Extra-Large and
+  Cross-Lingual Evaluation Framework for Word Sense Disambiguation.*
+  AAAI.
+* https://sapienzanlp.github.io/xl-wsd/
 """
 
 from __future__ import annotations
@@ -33,7 +58,8 @@ XL_WSD_LANGS = [
 def iter_instances(lang: str, xl_wsd_root: Path,
                    lexicon: str | None = None) -> Iterator[WSDInstance]:
     raise NotImplementedError(
-        "XL-WSD loader: V1 stub. Drop the XL-WSD release in xl_wsd_root and "
-        "implement the Raganato-style walk, then call "
-        "pywsd_datasets.mappers.babelnet_to_wn for sense-id resolution."
+        "XL-WSD is not implemented in pywsd-datasets v0.2. It requires "
+        "the BabelNet → PWN 3.0 bridge file (academic license only) and "
+        "is CC-BY-NC, so we do not redistribute. See the module docstring "
+        "in pywsd_datasets/loaders/xl_wsd.py for how to revive it."
     )

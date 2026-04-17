@@ -1,17 +1,19 @@
 """BabelNet → WordNet sense-key mapping.
 
-XL-WSD and SemEval-2013/2015 multilingual tracks use BabelNet IDs
-(``bn:00009191n``) as gold senses. BabelNet ships a ``bn_to_wn.txt``
-(or equivalent) bridge file mapping each BN synset to a PWN 3.0 sense
-key (or offset), from which we chain through :mod:`pwn3_to_oewn` to
-reach modern wn synset IDs.
+**Status: unused in v0.2.** The XL-WSD multilingual loader is not
+wired yet (see ``loaders/xl_wsd.py``); this module is kept so the API
+surface is stable once someone with BabelNet academic access loads
+the bridge file.
 
-**V1 is a stub.** The actual mapping file is distributed with
-BabelNet (academic login required) and is large (~300 MB). The V1
-loader for XL-WSD therefore emits rows with the BabelNet ID in
-``source_sense_id`` and an empty ``sense_ids_wordnet`` list; the
-coverage report flags the gap. Populate by dropping ``bn_to_wn.txt``
-into ``data/external/`` and calling :func:`load_bn_to_pwn3_map`.
+XL-WSD and SemEval-2013/2015 multilingual tracks use BabelNet IDs
+(``bn:00009191n``) as gold senses. BabelNet distributes a
+``bn_to_wn.txt``-style bridge mapping each BN synset to a PWN 3.0
+sense key (or offset); from there we chain through :mod:`pwn3_to_oewn`
+to reach modern wn synset IDs.
+
+The mapping file is large (~300 MB) and requires a BabelNet academic
+login. Drop it into ``data/external/`` and call
+:func:`load_bn_to_pwn3_map` before iterating XL-WSD.
 """
 
 from __future__ import annotations
