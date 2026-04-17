@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pywsd-datasets"
+version = "0.1.0"
+description = "Unified Word Sense Disambiguation benchmark datasets, normalized to modern wn lexicon sense IDs (oewn:2024 and omw:*)."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "alvations" }]
+requires-python = ">=3.10"
+keywords = ["wsd", "word-sense-disambiguation", "wordnet", "oewn", "semeval", "senseval", "benchmark", "multilingual"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "wn>=1.0,<2",
+    "pyarrow>=15",
+    "tqdm>=4",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+hf = ["datasets>=2.14", "huggingface-hub>=0.20"]
+dev = ["pytest>=7", "datasets>=2.14", "huggingface-hub>=0.20", "ruff>=0.5"]
+
+[project.urls]
+Homepage = "https://github.com/alvations/pywsd-datasets"
+Issues = "https://github.com/alvations/pywsd-datasets/issues"
+
+[project.scripts]
+pywsd-datasets-build = "pywsd_datasets.cli:build_all"
+pywsd-datasets-coverage = "pywsd_datasets.cli:coverage"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["pywsd_datasets*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error", "ignore::DeprecationWarning:wn.*"]
