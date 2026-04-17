@@ -25,8 +25,13 @@ from pywsd_datasets.schema import WSDInstance
 from pywsd_datasets.mappers.pwn3_to_oewn import pwn3_sensekey_to_wn
 
 
-RAGANATO_URL = (
-    "http://lcl.uniroma1.it/wsdeval/data/WSD_Unified_Evaluation_Datasets.zip"
+# Primary source: our GitHub release mirror. Reliable HTTPS, pinned to
+# whatever we last verified + validated. Falls back to the upstream URL
+# (HTTP only — TLS cert is mismatched on lcl.uniroma1.it).
+RAGANATO_URLS: tuple[str, ...] = (
+    "https://github.com/alvations/pywsd-datasets/releases/download/"
+    "v0.1.0/WSD_Unified_Evaluation_Datasets.zip",
+    "http://lcl.uniroma1.it/wsdeval/data/WSD_Unified_Evaluation_Datasets.zip",
 )
 
 # Sub-dataset name → (directory inside the zip, file basename).
@@ -62,9 +67,21 @@ def fetch(cache_root: Path | None = None) -> Path:
     zip_path.parent.mkdir(parents=True, exist_ok=True)
 
     if not zip_path.exists():
-        with urlopen(RAGANATO_URL, timeout=60) as resp, open(zip_path, "wb") as fh:
-            while chunk := resp.read(1 << 16):
-                fh.write(chunk)
+        last_err: Exception | None = None
+        for url in RAGANATO_URLS:
+            try:
+                with urlopen(url, timeout=60) as resp, open(zip_path, "wb") as fh:
+                    while chunk := resp.read(1 << 16):
+                        fh.write(chunk)
+                break
+            except Exception as e:
+                last_err = e
+                continue
+        else:
+            raise RuntimeError(
+                f"failed to download Raganato bundle from any of "
+                f"{RAGANATO_URLS!r}"
+            ) from last_err
 
     with zipfile.ZipFile(zip_path) as zf:
         zf.extractall(zip_path.parent)
