@@ -49,4 +49,12 @@ include = ["pywsd_datasets*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-filterwarnings = ["error", "ignore::DeprecationWarning:wn.*"]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:wn.*",
+    # urllib's SSLSocket GC after the Raganato HTTP download fires an
+    # unraisable warning in Python 3.10+; the test itself has already
+    # passed. See https://github.com/python/cpython/issues/80480.
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore::ResourceWarning",
+]
